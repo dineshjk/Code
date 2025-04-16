@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Environment
+venv/
+env/
+.env
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Unit test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Misc
+*.log
+.DS_Store
