@@ -1,6 +1,22 @@
 # DJKMath Library
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.x-green.svg)
+
 A Python library implementing high-precision trigonometric functions using power series expansions.
+
+## Installation
+
+1. Clone the repository:
+```cmd
+git clone https://github.com/dineshjk/Code.git
+cd Code
+```
+
+2. Install required packages:
+```cmd
+pip install mpmath
+```
 
 ## Features
 - Power series implementations of trigonometric functions:
