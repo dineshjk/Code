@@ -14,12 +14,10 @@ from Utils import get_integer
 
 """
 
-from requests import get
 from .keyboard_utils import clear_screen, get_single_key, wait_for_key
 
 def get_integer(constraint=None, message="Enter an integer: ", range_min=None, range_max=None):
-    """
-    Prompt the user for an integer with optional constraints.
+    """Prompt the user for an integer with optional constraints.
 
     Parameters:
     -----------
@@ -27,13 +25,18 @@ def get_integer(constraint=None, message="Enter an integer: ", range_min=None, r
         Type of constraint to apply:
         - "positive": Only accept positive integers (> 0)
         - "negative": Only accept negative integers (< 0)
-        - None: Accept any integer
+        - "non-negative": Only accept integers >= 0
+        - "non-positive": Only accept integers <= 0
+        - None: Accept any integer (default)
+        Note: When constraint is specified, range_min and range_max must be None
     message : str, optional
         Custom prompt message to display to the user
     range_min : int, optional
         Minimum value (inclusive) for the integer input
+        Must be None if constraint is specified
     range_max : int, optional
         Maximum value (inclusive) for the integer input
+        Must be None if constraint is specified
 
     Returns:
     --------
@@ -43,8 +46,9 @@ def get_integer(constraint=None, message="Enter an integer: ", range_min=None, r
     Raises:
     -------
     ValueError
-        If the input cannot be converted to an integer
-        If the range constraints are invalid (min > max)
+        - If the input cannot be converted to an integer
+        - If both constraint and range parameters are specified
+        - If range_min > range_max
     KeyboardInterrupt
         If the user cancels the input (Ctrl+C)
     RuntimeError
@@ -52,11 +56,26 @@ def get_integer(constraint=None, message="Enter an integer: ", range_min=None, r
 
     Examples:
     --------
+    # Using constraints (no ranges allowed with constraints)
+    >>> num = get_integer("positive")                 # Gets number > 0
+    >>> num = get_integer("negative")                 # Gets number < 0
+    >>> num = get_integer("non-negative")             # Gets number >= 0
+    >>> num = get_integer("non-positive")             # Gets number <= 0
+
+    # Using ranges (no constraints allowed with ranges)
     >>> num = get_integer(range_min=1, range_max=10)  # Gets number between 1 and 10
-    >>> num = get_integer("positive")                 # Gets any positive number
     >>> num = get_integer(range_min=0, range_max=100) # Gets number between 0 and 100
+    >>> num = get_integer(range_min=-10, range_max=10)# Gets number between -10 and 10
+
+    # Basic usage (no constraints or ranges)
+    >>> num = get_integer()                           # Gets any integer
+    >>> num = get_integer(message="Enter age: ")      # Gets any integer with custom message
     """
-    # Validate range constraints
+    # Validate constraint and range compatibility
+    if constraint is not None and (range_min is not None or range_max is not None):
+        raise ValueError("Cannot specify both constraint and range parameters")
+
+    # Validate range constraints if provided
     if range_min is not None and range_max is not None:
         if range_min > range_max:
             raise ValueError(f"Invalid range: min ({range_min}) cannot be greater than max ({range_max})")
@@ -81,23 +100,28 @@ def get_integer(constraint=None, message="Enter an integer: ", range_min=None, r
             if constraint == "negative" and value >= 0:
                 print("Please enter a negative integer (less than 0).")
                 continue
+            if constraint == "non-negative" and value < 0:
+                print("Please enter a non-negative integer (greater than or equal to 0).")
+                continue
+            if constraint == "non-positive" and value > 0:
+                print("Please enter a non-positive integer (less than or equal to 0).")
+                continue
 
             return value
 
         except ValueError:
             print("Invalid input. Please enter an integer only.")
-            raise ValueError("Input must be an integer")
+            continue
         except KeyboardInterrupt:
             print("\nInput cancelled by user.")
             raise KeyboardInterrupt("Input operation cancelled by user")
         except Exception as e:
             error_msg = f"Unexpected error during integer input: {str(e)}"
             print(error_msg)
-            raise RuntimeError(error_msg) from e
+            continue
 
-def get_float(constraint=None, message="Enter a real number: ", range_min=None, range_max=None):
-    """
-    Prompt the user for a float with optional constraints.
+def get_float(constraint=None, message="Enter a float: ", range_min=None, range_max=None):
+    """Get float input from user with error handling and constraints.
 
     Parameters:
     -----------
@@ -105,51 +129,100 @@ def get_float(constraint=None, message="Enter a real number: ", range_min=None, 
         Type of constraint to apply:
         - "positive": Only accept positive numbers (> 0)
         - "negative": Only accept negative numbers (< 0)
-        - None: Accept any number
+        - "non-negative": Only accept numbers >= 0
+        - "non-positive": Only accept numbers <= 0
+        - None: Accept any float (default)
+        Note: When constraint is specified, range_min and range_max must be None
     message : str, optional
         Custom prompt message to display to the user
     range_min : float, optional
         Minimum value (inclusive) for the float input
+        Must be None if constraint is specified
     range_max : float, optional
         Maximum value (inclusive) for the float input
+        Must be None if constraint is specified
 
     Returns:
     --------
     float
-        The validated float input that meets the specified constraint
+        The validated float value meeting specified constraints
 
     Raises:
     -------
     ValueError
-        If the input cannot be converted to a float
-        If the range constraints are invalid (min > max)
+        - If the input cannot be converted to a float
+        - If both constraint and range parameters are specified
+        - If range_min > range_max
+    KeyboardInterrupt
+        If the user cancels the input (Ctrl+C)
+    RuntimeError
+        If an unexpected error occurs during input processing
+
+    Examples:
+    --------
+    # Using constraints (no ranges allowed with constraints)
+    >>> num = get_float("positive")                 # Gets number > 0
+    >>> num = get_float("negative")                 # Gets number < 0
+    >>> num = get_float("non-negative")             # Gets number >= 0
+    >>> num = get_float("non-positive")             # Gets number <= 0
+
+    # Using ranges (no constraints allowed with ranges)
+    >>> num = get_float(range_min=1, range_max=10)  # Gets number between 1 and 10
+    >>> num = get_float(range_min=0, range_max=100) # Gets number between 0 and 100
+    >>> num = get_float(range_min=-10, range_max=10)# Gets number between -10 and 10
+
+    # Basic usage (no constraints or ranges)
+    >>> num = get_float()                           # Gets any float
+    >>> num = get_float(message="Enter pH: ")       # Gets any float with custom message
     """
-    # Validate range constraints
+    # Validate constraint and range compatibility
+    if constraint is not None and (range_min is not None or range_max is not None):
+        raise ValueError("Cannot specify both constraint and range parameters")
+
+    # Validate range constraints if provided
     if range_min is not None and range_max is not None:
         if range_min > range_max:
             raise ValueError(f"Invalid range: min ({range_min}) cannot be greater than max ({range_max})")
         message = f"{message} [{range_min}-{range_max}]: "
 
-    try:
-        value = float(input(message).strip())
+    while True:
+        try:
+            value = float(input(message).strip())
 
-        # Check range constraints
-        if range_min is not None and value < range_min:
-            raise ValueError(f"Value must be greater than or equal to {range_min}")
-        if range_max is not None and value > range_max:
-            raise ValueError(f"Value must be less than or equal to {range_max}")
+            # Check range constraints
+            if range_min is not None and value < range_min:
+                print(f"Please enter a number greater than or equal to {range_min}.")
+                continue
+            if range_max is not None and value > range_max:
+                print(f"Please enter a number less than or equal to {range_max}.")
+                continue
 
-        # Check other constraints
-        if constraint == "positive" and value <= 0:
-            raise ValueError("Value must be positive")
-        if constraint == "negative" and value >= 0:
-            raise ValueError("Value must be negative")
+            # Check other constraints
+            if constraint == "positive" and value <= 0:
+                print("Please enter a positive number (greater than 0).")
+                continue
+            if constraint == "negative" and value >= 0:
+                print("Please enter a negative number (less than 0).")
+                continue
+            if constraint == "non-negative" and value < 0:
+                print("Please enter a non-negative number (greater than or equal to 0).")
+                continue
+            if constraint == "non-positive" and value > 0:
+                print("Please enter a non-positive number (less than or equal to 0).")
+                continue
 
-        return value
+            return value
 
-    except ValueError as e:
-        print("Invalid input. Please enter a number only.")
-        raise ValueError(str(e))
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+            continue
+        except KeyboardInterrupt:
+            print("\nInput cancelled by user.")
+            raise KeyboardInterrupt("Input operation cancelled by user")
+        except Exception as e:
+            error_msg = f"Unexpected error during float input: {str(e)}"
+            print(error_msg)
+            continue
 
 def get_complex(message="Enter a complex number (a + bj): "):
     """
@@ -200,28 +273,33 @@ def get_bunch_integers(numbers, n=None):
     Returns:
     - list: The updated list 'numbers' containing the integers entered by the user.
     """
+
+    if n is not None:
+        if n < 1:
+            raise ValueError("Number of values must be at least 1")
+        numbers.extend([0] * n)
+        for i in range(n):
+            while True:
+                print(f"Enter integer number {i+1} of {n} ")
+                entry = input(">> ")
+                try:
+                    numbers[i] = int(entry)
+                    break
+                except (ValueError, TypeError):
+                    print(f"Invalid input for {i}th integer. Please enter an integer")
+                    continue
+        return numbers
     count = 0
     while True:
-        clear_screen()
-        if n is not None:
-            print(f"Enter integer number {count + 1} of {n} (or anything else to cancel):")
-        else:
-            print(f"Enter integer number {count + 1} (or anything else to stop):")
-
+        print(f"Enter integer number {count+1} (or anything else to stop):")
         entry = input(">> ")
         try:
             number = int(entry)
             numbers.append(number)
             count += 1
-            if n is not None and count >= n:
-                print("\nMaximum number of integers reached.")
-                get_single_key("Press any key to continue...")
-                break
         except ValueError:
             print(f"\nYou entered {count} integers. Stopping input.")
-            get_single_key("Press any key to continue...")
-            break
-    return numbers
+            return numbers
 
 def get_bunch_floats(numbers, n=None):
     """
@@ -242,27 +320,35 @@ def get_bunch_floats(numbers, n=None):
     Returns:
     - list: The updated list 'numbers' containing the floats entered by the user.
     """
+
+    if n is not None:
+        if n < 1:
+            raise ValueError("Number of values must be at least 1")
+        numbers.extend([0] * n)
+        for i in range(n):
+            while True:
+                print(f"Enter a real number {i+1} of {n} ")
+                entry = input(">> ")
+                try:
+                    numbers[i] = float(entry)
+                    break
+                except (ValueError, TypeError):
+                    print(f"Invalid input for {i}th integer. Please enter an integer")
+                    continue
+        return numbers
     count = 0
     while True:
-        clear_screen()
-        if n is not None:
-            print(f"Enter float number {count + 1} of {n} (or anything else to cancel):")
-        else:
-            print(f"Enter float number {count + 1} (or anything else to stop):")
-
+        print(f"Enter a real number {count+1} (or anything else to stop):")
         entry = input(">> ")
         try:
             number = float(entry)
             numbers.append(number)
             count += 1
-            if n is not None and count >= n:
-                break
         except ValueError:
-            print("\nNon-float input detected. Stopping input.")
-            break
-    return numbers
+            print(f"\nYou entered {count} real numbers. Stopping input.")
+            return numbers
 
-def get_bunch_complex(num_values=1, message="Enter a complex number (a + bj): "):
+def get_bunch_complex(values, num_values=None, message="Enter a complex number (a + bj): "):
     """
     Prompt the user for multiple complex numbers.
 
@@ -278,15 +364,36 @@ def get_bunch_complex(num_values=1, message="Enter a complex number (a + bj): ")
     list
         List of complex numbers entered by the user
     """
-    if num_values < 1:
-        raise ValueError("Number of values must be at least 1")
+    if num_values is not None:
+        if num_values < 1:
+            raise ValueError("Number of values must be at least 1")
 
-    values = []
+        count = 0
+
+        while count < num_values:
+            try:
+                prompt = f"{message} [{count+1}/{num_values}]: "
+                value = input(prompt).strip().replace(" ", "")
+
+                # Handle input without imaginary part
+                if 'j' not in value:
+                    complex_value = complex(float(value), 0)
+                else:
+                    complex_value = complex(value)
+
+                values.append(complex_value)
+                count += 1
+
+            except ValueError:
+                print("Invalid input. Please enter a complex number in the form a+bj")
+                print("Examples: 3+4j, 1-2j, 5 (for real numbers)")
+                continue
+
+        return values
     count = 0
-
-    while count < num_values:
+    while True:
         try:
-            prompt = f"{message} [{count+1}/{num_values}]: "
+            prompt = f"{message} [{count+1}. Enter anything else to stop.]: "
             value = input(prompt).strip().replace(" ", "")
 
             # Handle input without imaginary part
@@ -299,8 +406,14 @@ def get_bunch_complex(num_values=1, message="Enter a complex number (a + bj): ")
             count += 1
 
         except ValueError:
-            print("Invalid input. Please enter a complex number in the form a+bj")
-            print("Examples: 3+4j, 1-2j, 5 (for real numbers)")
-            continue
+            print("You entered {count} complex numbers. Stopping input.")
+            return values
 
-    return values
+        except KeyboardInterrupt:
+            print("\nInput cancelled by user.")
+            raise KeyboardInterrupt("Input operation cancelled by user")
+
+        except Exception as e:
+            error_msg = f"Unexpected error during complex input: {str(e)}"
+            print(error_msg)
+            raise RuntimeError("Unexpected error during complex input")

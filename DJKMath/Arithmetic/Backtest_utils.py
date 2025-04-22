@@ -8,11 +8,17 @@ Currently testing Menu and Keyboard input.
 # This is test files that will go on changing.
 
 import sys
+import os
 
+# Add parent directory to Python path to find Utils package
+#sys.path.append(".")
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+# According to many help files the least preferred and volatile is first one.
+# The second is robust
+# The third is the most robust and preferred.
 
-sys.path.append(".")
 
 from Utils import get_integer, operate_menu, clear_screen, get_single_key,get_bunch_integers
 from number_theory import all_divisors, is_prime, gcd_numbers, lcm_numbers

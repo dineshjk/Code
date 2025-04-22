@@ -1,7 +1,37 @@
 """
-trigo_sin_cos_tan.py
-Main entry point for the high-precision trigonometric calculator using mpmath.
+High-Precision Trigonometric Calculator
+
+This module implements trigonometric functions using Taylor series expansions with
+arbitrary precision using the mpmath library. Each function supports both degree
+and radian inputs with configurable precision.
+
+Functions:
+    sine_power_series(x, precision): Calculate sine using Taylor series
+    cosine_power_series(x, precision): Calculate cosine using Taylor series
+    tangent_power_series(x, precision): Calculate tangent as sine/cosine
+    secant_power_series(x, precision): Calculate secant as 1/cosine
+    cosecant_power_series(x, precision): Calculate cosecant as 1/sine
+    cotangent_power_series(x, precision): Calculate cotangent as cosine/sine
+    process_degree(degree, minute, second): Convert DMS to radians
+    process_radian(radian): Convert and normalize radians
+    get_precision(): Get user input for calculation precision
+    flprint(value, precision, message): Format and print values
+    main(): Run the interactive calculator
+
+Each trigonometric function returns:
+    - The calculated result with specified precision
+    - Number of terms used in the series expansion
+    - Comparison with built-in mpmath functions
+
+Dependencies:
+    mpmath: For high-precision arithmetic
+    Utils: For menu operations and input handling
+
+Author: Dinesh Karia
+Date: 16 April 2025
+Version: 1.0
 """
+
 import os
 import sys
 
